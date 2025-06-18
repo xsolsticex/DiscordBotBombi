@@ -6,6 +6,10 @@ from discord import Colour, Embed, Message,DMChannel
 from discord.ext import commands
 from discord.ext.commands import Context
 from dotenv import load_dotenv
+
+from gptbot import GPTBot
+
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -13,6 +17,8 @@ client = commands.Bot(intents=intents,command_prefix="!")
 guilds = {}
 lista = []
 usuarios = set()
+
+gpt = GPTBot()
 
 documentos = 0
 
@@ -29,31 +35,41 @@ async def on_ready():
 
 @client.event
 async def on_message(message:Message):
-      channel = message.channel
-      user = message.author
-      if isinstance(channel,DMChannel) and not user.bot:
-            if user.name not in usuarios:
-                  usuarios.add(user.name)
-                  await user.send(f"Hola {user.name} en que puedo ayudarte?")
-                  await asyncio.sleep(2)
-                  await user.send("```Para escribir un post de forma anonima utiliza el comando !post seguido de tu mensaje```")
+
 
       await client.process_commands(message)
-      #await channel.send(f"Hola {user.name}")
+
+@client.command()
+async def q(ctx:Context,*,text):
+    mensaje = text
+    channel = client.get_channel(1384845888442335273)
+    if mensaje:
+        respuesta = gpt.prompt(text)
+        await channel.send(respuesta)
+
     
 @client.command()
-async def post(ctx:Context,*,text):
-   usuario = ctx.author
-   
-   channel = client.get_channel(1369649025602814024)
-   msg_embed = Embed()
-   fecha  = datetime.now()
-   msg_embed.title = f"Testimonio Anonimo - {fecha.date()}"
-   msg_embed.colour = Colour.brand_green()
-   msg_embed.set_image(url="https://sorece.org/wp-content/uploads/2024/01/sorece-blog-por-que-es-importante-hablar-de-la-salud-mental-1024x683.webp")
-   msg_embed.description = text
-   await channel.send(embed=msg_embed)
-   await usuario.send("Mensaje creado")
+async def post(ctx: Context, *, text):
+    usuario = ctx.author
+
+    try:
+        channel = client.get_channel(1383126424864424158)
+        fecha = datetime.now()
+        msg_embed = Embed(
+            title=f"Testimonio Anónimo - {fecha.date()}",
+            description=text,
+            colour=Colour.brand_green()
+        )
+        msg_embed.set_image(url="https://sorece.org/wp-content/uploads/2024/01/sorece-blog-por-que-es-importante-hablar-de-la-salud-mental-1024x683.webp")
+
+        await channel.send(embed=msg_embed)
+        await usuario.send("Tu mensaje fue publicado de forma anónima.")
+    except Exception as e:
+        print(f"Error al enviar mensaje: {e}")
+        try:
+            await usuario.send("Ocurrió un error al publicar tu mensaje. Intenta más tarde.")
+        except:
+            pass
 
 
 
