@@ -26,10 +26,9 @@ load_dotenv()
 
 @client.event
 async def on_ready():
-
     channels = client.guilds
     for element in channels:
-      lista.append({f"{element.name}":f"{element.id}"})
+        lista.append({f"{element.name}":f"{element.id}"})
     guilds["servers"] = lista
 
 
@@ -54,27 +53,39 @@ async def q(ctx:Context,*,text):
 
     
 @client.command()
-async def post(ctx: Context, *, text):
+async def post(ctx: Context, *, text = None):
     usuario = ctx.author
     current_channel = ctx.channel
-    try:
-        channel = client.get_channel(1382725980887449620)
-        fecha = datetime.now()
-        msg_embed = Embed(
-            title=f"Testimonio Anónimo - {fecha.date()}",
-            description=text,
-            colour=Colour.brand_green()
-        )
-        msg_embed.set_image(url="https://sorece.org/wp-content/uploads/2024/01/sorece-blog-por-que-es-importante-hablar-de-la-salud-mental-1024x683.webp")
+    message = ctx.message
 
-        await channel.send(embed=msg_embed)
-        await usuario.send("Tu mensaje fue publicado de forma anónima.")
+    if not text:
+        await message.delete()
+        await usuario.send("❌ Debes escribir un mensaje. Usa `!post <tu mensaje>` por DM.")
+        return
+    
+    try:
+        if isinstance(current_channel,DMChannel):
+            channel = client.get_channel(1382725980887449620)
+            fecha = datetime.now()
+            msg_embed = Embed(
+                title=f"Testimonio Anónimo - {fecha.date()}",
+                description=text,
+                colour=Colour.brand_green()
+            )
+            msg_embed.set_image(url="https://sorece.org/wp-content/uploads/2024/01/sorece-blog-por-que-es-importante-hablar-de-la-salud-mental-1024x683.webp")
+
+            await channel.send(embed=msg_embed)
+            await usuario.send("Tu mensaje fue publicado de forma anónima.")
+        else:
+            await message.delete()
+            await current_channel.send("Uso de comando !post -> Envia `!post <tu mensaje>`, no en canales públicos")
+
     except Exception as e:
         print(f"Error al enviar mensaje: {e}")
         try:
             await usuario.send("Ocurrió un error al publicar tu mensaje. Intenta más tarde.")
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
 
 
