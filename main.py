@@ -36,24 +36,29 @@ async def on_ready():
 @client.event
 async def on_message(message:Message):
 
-
-      await client.process_commands(message)
+    await client.process_commands(message)
 
 @client.command()
 async def q(ctx:Context,*,text):
     mensaje = text
-    channel = client.get_channel(1384845888442335273)
-    if mensaje:
-        respuesta = gpt.prompt(text)
-        await channel.send(respuesta)
+    canal = ctx.channel
+    user = ctx.author
+    if isinstance(canal,DMChannel):
+        respuesta = await gpt.prompt(user.name,text)
+        await user.send(respuesta)
+    else:
+        channel = client.get_channel(1384845888442335273)
+        if mensaje:
+            respuesta = await gpt.prompt(user.name,text)
+            await channel.send(respuesta)
 
     
 @client.command()
 async def post(ctx: Context, *, text):
     usuario = ctx.author
-
+    current_channel = ctx.channel
     try:
-        channel = client.get_channel(1383126424864424158)
+        channel = client.get_channel(1382725980887449620)
         fecha = datetime.now()
         msg_embed = Embed(
             title=f"Testimonio Anónimo - {fecha.date()}",
