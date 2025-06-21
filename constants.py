@@ -1,0 +1,11 @@
+from enum import Enum
+from zoneinfo import ZoneInfo
+
+
+class Servers(Enum):
+    BIBLIOTEK = 1384845888442335273
+    CANAL_PRUEBAS = 1383144202589831229
+    SALUD_MENTAL = 1382725980887449620
+    HIPI_TESTS = 1385192439437987971
+
+SPAIN = ZoneInfo("Europe/Paris")
